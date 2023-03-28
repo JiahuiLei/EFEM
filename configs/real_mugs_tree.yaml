@@ -1,0 +1,138 @@
+# iter: [0] # select specific
+shape_priors:
+  "mug":
+    field_pt: ./weights/mugs.pt
+    field_cfg: ./lib_shape_prior/configs/mugs.yaml
+    database_cache_fn: cache/mugs.npz
+    # field_pt: ../log/v4.3.3_shape_prior_mugs/checkpoint/selected.pt
+    # field_cfg: ../configs/v4/v4.3.3_mugs.yaml
+    # database_cache_fn: cache/v4.3.3_mugs_selected.npz
+    database_n_pcl_store: 5000
+    database_k:
+      inv: 10
+      so3: 3
+      joint: 3
+
+dataset_mode: sapien_processed
+dataset:
+  data_dir: "data/chairs_and_mugs/real_mugs_tree_normal_pth/"
+  phase: "test"
+  postfix: ".pth"
+
+solver_global:
+  use_double: True
+  use_sdf: True
+  use_normal: True
+  phase1_max_steps: 15
+  phase2_max_steps: 5
+  num_episode: 1
+
+  est_chunk: 30
+  query_chunk: 30000
+
+  # joint prob setting
+  joint_background_omega: 0.0001
+  joint_duplication_removal_cfg:
+    iou_th: 0.7
+    inclusion_th: 0.8
+    sdf_th: 0.04 # the dist in canonical space
+
+  mesh_extractor:
+    threshold: 0.5
+    resolution0: 32
+    upsampling_steps: 2
+    sample: False
+    simplify_nfaces: 5000
+    points_batch_size: 10000
+    refinement_step: 0
+
+solver_per_model:
+  "mug":
+    num_init_proposal_list: [400] # [200, 100]
+    init_proposal_radius: 0.07 # 0.1
+    compute_error_radius: 0.11 # 0.14
+    crop_mode: sphere
+
+    # for prob
+    background_omega: 0.0001
+    sdf2value:
+      k_start: 3.0 # 30.0
+      k_end: 30.0 # 30 is too sharp if the prior is not good
+      th_start: 0.1
+      th_end: 0.07
+      out_th_value: 100.0
+      end_step: 10
+    normal2value: # in deg, not the hard th
+      k_start: 0.003 # todo: need to finetune this
+      k_end: 0.006 # 30 is too sharp if the prior is not good
+      th_start: 90.0
+      th_end: 60.0
+      out_th_value: 100.0
+      end_step: 10
+
+    # for output
+    output_sdf_th: 0.04
+    output_normal_th: 180
+    # output_overlap_th: 0.15 # 0.04
+
+    # for filtering the proposal
+    proposal_min_size: 300
+    duplication_removal:
+      iou_th: 0.7
+      sdf_th: 0.04 # the dist in canonical space
+    database_similarity:
+      icp_refine_iter: 3
+      inlier_th: 0.04
+      accept_topk: 1
+    coverage_score:
+      inlier_th: 0.03
+      inlier_angle_th: 30
+    stationary_score:
+      sdf_th: 0.03
+      angle_th: 30
+
+    scale_check:
+      dim: [[0, 2], [1]]
+      range: [[0.03, 0.08], [0.015, 0.1]]
+    orientation_check:
+      dim: [1] # the dim of the object basis
+      target_dir: [[0.0, 1.0, 0.0]]
+      range: [[0.0, 180.0]]
+
+log_dir: ./log/real_mugs_tree
+log_resume: false
+
+viz:
+  viz_flag: false
+  viz_iter: false
+  viz_iter_start: 14
+  viz_detailed_proposal: false
+  viz_results_during_filtering: true
+
+  scene_viz_args:
+    shape: [1080, 720] # [900, 600]
+    pts_r: 0.003
+    corner_r: -1.0 #0.006
+    pcl_alpha: 1.0
+    yfov: 0.785
+    cam_angle_yaw: [1.57]
+    cam_angle_pitch: [0.8]
+    cam_angle_z: [0.0]
+    cam_dist: [1.2]
+    cam_height: [0.1]
+    # for joint viz
+    group1_pcl_alpha: 1.0
+    group1_mesh_alpha: 1.0
+    group2_pcl_alpha: 0.5
+    group2_mesh_alpha: 0.5
+    background_pts_r: 0.001
+    viz_modes: ["ins"]
+
+  step_viz_args:
+    cam_dist: 0.5
+    cam_dist_can: 0.5
+    cam_angle_pitch: 1.047
+    cam_angle_yaw: 1.57
+    pts_r: 0.003
+    corner_r: 0.006
+    centered_shape_pcl: True

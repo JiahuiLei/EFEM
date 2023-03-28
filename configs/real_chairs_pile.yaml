@@ -1,0 +1,133 @@
+# iter: [0] # select specific
+shape_priors:
+  "chair":
+    field_pt: ./weights/chairs.pt
+    field_cfg: ./lib_shape_prior/configs/chairs.yaml
+    database_cache_fn: cache/chairs.npz
+    database_n_pcl_store: 30000
+    database_k:
+      inv: 23
+      so3: 1
+      joint: 1
+
+dataset_mode: sapien_processed
+dataset:
+  data_dir: "data/chairs_and_mugs/real_chairs_pile_normal_pth/"
+  phase: "test"
+  postfix: ".pth"
+
+solver_global:
+  use_double: True
+  use_sdf: True
+  use_normal: True
+  phase1_max_steps: 15
+  phase2_max_steps: 5
+  num_episode: 1
+
+  est_chunk: 30
+  query_chunk: 30000
+
+  # joint prob setting
+  joint_background_omega: 0.0001
+  joint_duplication_removal_cfg:
+    iou_th: 0.7
+    inclusion_th: 0.8
+    sdf_th: 0.04 # the dist in canonical space
+
+  mesh_extractor:
+    threshold: 0.5
+    resolution0: 32
+    upsampling_steps: 2
+    sample: False
+    simplify_nfaces: 5000
+    points_batch_size: 10000
+    refinement_step: 0
+
+solver_per_model:
+  "chair":
+    num_init_proposal_list: [100]
+    init_proposal_radius: 0.35 # 0.1
+    compute_error_radius: 0.65 # 0.14
+    crop_mode: sphere
+
+    # for prob
+    background_omega: 0.0001
+    sdf2value:
+      k_start: 5.0 # 30.0
+      k_end: 20.0 # 30 is too sharp if the prior is not good
+      th_start: 0.2
+      th_end: 0.15
+      out_th_value: 100.0
+      end_step: 10
+    normal2value: # in deg, not the hard th
+      k_start: 0.002
+      k_end: 0.003 # 30 is too sharp if the prior is not good
+      th_start: 120.0
+      th_end: 70.0
+      out_th_value: 100.0
+      end_step: 10
+
+    # for output
+    output_sdf_th: 0.05
+    output_normal_th: 180
+
+    # for filtering the proposal
+    proposal_min_size: 300
+    duplication_removal:
+      iou_th: 0.8
+      sdf_th: 0.04 # the dist in canonical space
+    database_similarity:
+      icp_refine_iter: 3
+      inlier_th: 0.05
+      accept_topk: 1
+    coverage_score:
+      inlier_th: 0.04
+      inlier_angle_th: 45
+    stationary_score:
+      sdf_th: 0.04
+      angle_th: 45
+
+    scale_check:
+      dim: [[0, 2], [1]]
+      range: [[0.125, 0.6], [0.0, 0.9]]
+    orientation_check:
+      dim: [1] # the dim of the object basis
+      target_dir: [[0.0, 1.0, 0.0]]
+      range: [[[0.0, 180.0]]]
+
+log_dir: ./log/real_chairs_pile
+log_resume: false
+
+viz:
+  viz_flag: false
+  viz_iter: false
+  viz_iter_start: 14
+  viz_detailed_proposal: false
+  viz_results_during_filtering: true
+
+  scene_viz_args:
+    shape: [1080, 720]
+    pts_r: 0.01
+    corner_r: 0.015
+    pcl_alpha: 1.0
+    # yfov: 0.785
+    cam_angle_yaw: [0.0, 1.57, 3.14, 4.71]
+    cam_angle_pitch: [0.8, 0.8, 0.8, 0.8] #, 1.047, 1.047]
+    cam_angle_z: [0.0, 0.0, 0.0, 0.0]
+    cam_dist: [2.5, 2.5, 2.5, 2.5]
+    cam_height: [-0.1, -0.1, -0.1, -0.1] #, -0.1, -0.1]
+    # for joint viz
+    group1_pcl_alpha: 1.0
+    group1_mesh_alpha: 1.0
+    group2_pcl_alpha: 0.5
+    group2_mesh_alpha: 0.5
+    background_pts_r: 0.006
+    viz_modes: ["ins"]
+
+  step_viz_args:
+    cam_dist: 2.0
+    cam_dist_can: 2.0
+    cam_angle_pitch: 1.047
+    cam_angle_yaw: 1.57
+    pts_r: 0.01
+    corner_r: 0.015

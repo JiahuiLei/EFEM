@@ -1,0 +1,44 @@
+# platform: linux-64
+
+ipykernel>=6.0.0
+yacs
+tensorboardX # ==2.0
+tensorboard # ==2.4.1 #2.2.0
+scikit-image
+scipy==1.8.1
+numpy==1.23.0
+xlwt
+xlrd
+pyrender==0.1.43
+cython # ==0.29.2
+moviepy # ==1.0.3
+shapely==1.8.4 
+transforms3d
+trimesh==3.12.6
+pandas
+setuptools
+# sklearn
+scikit-learn
+opencv-python
+jupyter
+jupyterlab
+objgraph
+pyquaternion
+seaborn
+h5py
+rtree
+tqdm
+black
+openpyxl
+scikit-image==0.14.2
+tensorboard-plugin-profile
+imageio
+easydict==1.9
+matplotlib #==3.2.1
+plotly==4.7.1
+plyfile==0.7.2
+pytest==6.2.1
+pymeshlab
+triangle
+pickleshare==0.7.5
+black
